@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{E81D96CE-7E28-494C-98A4-F2F1AA5DAFD8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotnet_Test_Task.Api", "backend\Dotnet_Test_Task.Api\Dotnet_Test_Task.Api.csproj", "{8754C14F-6B8E-4BC5-917B-4C8F8AFD21B4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8754C14F-6B8E-4BC5-917B-4C8F8AFD21B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8754C14F-6B8E-4BC5-917B-4C8F8AFD21B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8754C14F-6B8E-4BC5-917B-4C8F8AFD21B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8754C14F-6B8E-4BC5-917B-4C8F8AFD21B4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8754C14F-6B8E-4BC5-917B-4C8F8AFD21B4} = {E81D96CE-7E28-494C-98A4-F2F1AA5DAFD8}
+	EndGlobalSection
+EndGlobal
