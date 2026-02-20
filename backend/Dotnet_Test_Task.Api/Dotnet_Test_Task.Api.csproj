@@ -1,5 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <ItemGroup>
+    <ProjectReference Include="..\Dotnet_Test_Task.Application\Dotnet_Test_Task.Application.csproj" />
+    <ProjectReference Include="..\Dotnet_Test_Task.Infrastructure\Dotnet_Test_Task.Infrastructure.csproj" />
+    <ProjectReference Include="..\Dotnet_Test_Task.Domain\Dotnet_Test_Task.Domain.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
