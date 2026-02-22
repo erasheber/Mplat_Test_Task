@@ -14,9 +14,20 @@ public sealed class GetPaymentsStatsEndpoint(IPaymentsService service)
 
     public override async Task HandleAsync(GetPaymentsStatsRequest req, CancellationToken ct)
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var defaultFrom = today.AddDays(-29);
-        var defaultTo = today;
+        int tzOffsetMinutes = 0;
+        if (HttpContext.Request.Headers.TryGetValue("X-Timezone-Offset", out var h) &&
+            int.TryParse(h.ToString(), out var parsed) &&
+            parsed >= -14 * 60 && parsed <= 14 * 60)
+        {
+            tzOffsetMinutes = parsed;
+        }
+        
+        var offset = TimeSpan.FromMinutes(-tzOffsetMinutes);
+        
+        var todayLocal = DateOnly.FromDateTime(DateTime.UtcNow + offset);
+        
+        var defaultFrom = todayLocal.AddDays(-29);
+        var defaultTo = todayLocal;
 
         if (!TryParseDate(req.From, out var from))
             from = defaultFrom;
@@ -27,21 +38,23 @@ public sealed class GetPaymentsStatsEndpoint(IPaymentsService service)
         if (to < from)
             (from, to) = (to, from);
         
-        if (from > today)
+        if (from > todayLocal)
         {
-            await Send.OkAsync(new GetPaymentsStatsResponse(), ct);
+            await Send.OkAsync(new GetPaymentsStatsResponse
+            {
+                TotalAmount = 0,
+                TotalCount = 0,
+                ByDays = new List<DailyStatsItem>()
+            }, ct);
             return;
         }
+
+        if (to > todayLocal)
+            to = todayLocal;
         
-        if (to > today) to = today;
-
-        var maxDays = 366;
-        if (to.DayNumber - from.DayNumber > maxDays)
-            to = from.AddDays(maxDays);
-
-        var query = new GetPaymentsStatsQuery(from, to);
+        var query = new GetPaymentsStatsQuery(from, to, tzOffsetMinutes);
         var stats = await service.GetStatsAsync(query, ct);
-
+        
         var response = new GetPaymentsStatsResponse
         {
             TotalAmount = stats.TotalAmount,

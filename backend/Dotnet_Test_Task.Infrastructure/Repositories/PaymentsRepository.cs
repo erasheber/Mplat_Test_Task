@@ -50,31 +50,40 @@ public sealed class PaymentsRepository(PaymentsDbContext db) : IPaymentsReposito
     public async Task<IReadOnlyList<DailyPaymentsStats>> GetDailyStatsAsync(
         DateOnly fromInclusive,
         DateOnly toInclusive,
+        int timezoneOffsetMinutes,
         CancellationToken ct)
     {
         if (toInclusive < fromInclusive)
             (fromInclusive, toInclusive) = (toInclusive, fromInclusive);
-
-        var fromDateTime = fromInclusive.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
-        var toDateTimeExclusive = toInclusive.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        
+        var offset = TimeSpan.FromMinutes(-timezoneOffsetMinutes);
+        
+        var fromLocal = fromInclusive.ToDateTime(TimeOnly.MinValue);
+        var toLocalExclusive = toInclusive.AddDays(1).ToDateTime(TimeOnly.MinValue);
+        
+        var fromUtc = new DateTimeOffset(fromLocal, offset).UtcDateTime;
+        var toUtcExclusive = new DateTimeOffset(toLocalExclusive, offset).UtcDateTime;
 
         var rows = await db.Payments.AsNoTracking()
-            .Where(x => x.CreatedAt >= fromDateTime && x.CreatedAt < toDateTimeExclusive)
-            .GroupBy(x => x.CreatedAt.Date)
-            .Select(g => new
-            {
-                Date = g.Key,
-                Count = g.LongCount(),
-                Amount = g.Sum(x => x.Amount)
-            })
-            .OrderBy(x => x.Date)
+            .Where(x => x.CreatedAt >= fromUtc && x.CreatedAt < toUtcExclusive)
+            .Select(x => new { x.CreatedAt, x.Amount })
             .ToListAsync(ct);
-
-        return rows
-            .Select(x => new DailyPaymentsStats(
-                DateOnly.FromDateTime(x.Date),
-                x.Count,
-                x.Amount))
+        
+        var result = rows
+            .Select(x =>
+            {
+                var localDt = x.CreatedAt + offset;
+                var localDate = DateOnly.FromDateTime(localDt);
+                return new { localDate, x.Amount };
+            })
+            .GroupBy(x => x.localDate)
+            .OrderBy(g => g.Key)
+            .Select(g => new DailyPaymentsStats(
+                g.Key,
+                g.LongCount(),
+                g.Sum(x => x.Amount)))
             .ToList();
+
+        return result;
     }
 }

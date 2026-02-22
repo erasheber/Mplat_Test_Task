@@ -31,7 +31,7 @@ public sealed class PaymentsService(IPaymentsRepository repo) : IPaymentsService
     public async Task<PaymentsStatsResult> GetStatsAsync(GetPaymentsStatsQuery query, CancellationToken ct)
     {
         var (totalAmount, totalCount) = await repo.GetTotalsAsync(ct);
-        var byDays = await repo.GetDailyStatsAsync(query.FromInclusive, query.ToInclusive, ct);
+        var byDays = await repo.GetDailyStatsAsync(query.FromInclusive, query.ToInclusive, query.TimezoneOffsetMinutes, ct);
         return new PaymentsStatsResult(totalAmount, totalCount, byDays);
     }
 }

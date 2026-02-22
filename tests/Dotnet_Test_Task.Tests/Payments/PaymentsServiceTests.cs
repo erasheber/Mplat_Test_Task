@@ -100,6 +100,7 @@ public class PaymentsServiceTests
 
         var from = new DateOnly(2026, 2, 1);
         var to = new DateOnly(2026, 2, 2);
+        const int tzOffsetMinutes = -300;
 
         var byDays = new List<DailyPaymentsStats>
         {
@@ -107,17 +108,17 @@ public class PaymentsServiceTests
             new(new DateOnly(2026, 2, 2), 5, 113.45m)
         };
 
-        _repo.Setup(r => r.GetDailyStatsAsync(from, to, It.IsAny<CancellationToken>()))
+        _repo.Setup(r => r.GetDailyStatsAsync(from, to, tzOffsetMinutes, It.IsAny<CancellationToken>()))
              .ReturnsAsync(byDays);
 
-        var result = await _sut.GetStatsAsync(new GetPaymentsStatsQuery(from, to), CancellationToken.None);
+        var result = await _sut.GetStatsAsync(new GetPaymentsStatsQuery(from, to, tzOffsetMinutes), CancellationToken.None);
 
         result.TotalAmount.Should().Be(123.45m);
         result.TotalCount.Should().Be(7);
         result.ByDays.Should().BeSameAs(byDays);
 
         _repo.Verify(r => r.GetTotalsAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _repo.Verify(r => r.GetDailyStatsAsync(from, to, It.IsAny<CancellationToken>()), Times.Once);
+        _repo.Verify(r => r.GetDailyStatsAsync(from, to, tzOffsetMinutes, It.IsAny<CancellationToken>()), Times.Once);
         _repo.VerifyNoOtherCalls();
     }
 }

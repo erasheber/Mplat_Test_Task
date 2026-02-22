@@ -22,7 +22,7 @@ public sealed record CreatePaymentCommand(
 
 public sealed record GetPaymentsQuery(int Page = 1, int PageSize = 20, bool SortByCreatedAtDesc = true);
 
-public sealed record GetPaymentsStatsQuery(DateOnly FromInclusive, DateOnly ToInclusive);
+public sealed record GetPaymentsStatsQuery(DateOnly FromInclusive, DateOnly ToInclusive, int TimezoneOffsetMinutes);
 
 public sealed record PaymentsStatsResult(
     decimal TotalAmount,

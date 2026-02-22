@@ -16,7 +16,11 @@ public interface IPaymentsRepository
 
     Task<(decimal TotalAmount, long TotalCount)> GetTotalsAsync(CancellationToken ct);
 
-    Task<IReadOnlyList<DailyPaymentsStats>> GetDailyStatsAsync(DateOnly fromInclusive, DateOnly toInclusive, CancellationToken ct);
+    Task<IReadOnlyList<DailyPaymentsStats>> GetDailyStatsAsync(
+        DateOnly fromInclusive,
+        DateOnly toInclusive,
+        int timezoneOffsetMinutes,
+        CancellationToken ct);
 }
 
 public sealed record DailyPaymentsStats(DateOnly Date, long Count, decimal Amount);
