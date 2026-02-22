@@ -41,7 +41,7 @@
         </tr>
         </tbody>
       </table>
-      <p v-else>Нет данных за период.</p>
+      <p v-else style="padding-left: 12px">Нет данных за период.</p>
     </div>
   </section>
 </template>
