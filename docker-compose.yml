@@ -1,28 +1,51 @@
-version: '3.9'
-
 services:
-
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16
     container_name: dotnet_test_task_postgres
-    restart: unless-stopped
-
     environment:
-      POSTGRES_DB: payments_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-
+      POSTGRES_DB: payments_db
     ports:
       - "5432:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d payments_db"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dotnet_Test_Task.Api/Dockerfile
+    container_name: dotnet_test_task_api
+    environment:
+      APP_UID: "0"
+      ASPNETCORE_ENVIRONMENT: Development
+
+      ConnectionStrings__Default: Host=postgres;Port=5432;Database=payments_db;Username=postgres;Password=postgres
+      Database__AutoMigrate: "true"
+      Security__ApiKey: dev-secret-key
+    ports:
+      - "5000:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: dotnet_test_task_frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:5000
+      VITE_API_KEY: dev-secret-key
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
 
 volumes:
   postgres_data:
