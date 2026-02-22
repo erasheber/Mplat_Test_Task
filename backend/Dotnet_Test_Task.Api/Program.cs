@@ -34,6 +34,14 @@ builder.Services.SwaggerDocument(o =>
     };
 });
 
+builder.Services.AddCors(o =>
+{
+    o.AddPolicy("dev", p =>
+        p.WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 var app = builder.Build();
 
 if (app.Configuration.GetValue<bool>("Database:AutoMigrate"))
@@ -43,6 +51,7 @@ if (app.Configuration.GetValue<bool>("Database:AutoMigrate"))
     db.Database.Migrate();
 }
 
+app.UseCors("dev");
 app.UseMiddleware<ApiKeyMiddleware>();
 
 app.UseFastEndpoints();
